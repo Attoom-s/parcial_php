@@ -9,8 +9,11 @@ class Quemadura {
     }
 
     public function aplicar(Personaje $p) {
-        echo $p->nombre . " sufre quemadura (-$this->danioPorTurno)\n";
-        $p->recibirDanio($this->danioPorTurno);
+        // Podría tener una pequeña variación cada vez que se aplica
+        $danioReal = $this->danioPorTurno + rand(-2, 2);
+        if ($danioReal < 1) $danioReal = 1;
+        echo $p->nombre . " sufre quemadura (-$danioReal)\n";
+        $p->recibirDanio($danioReal);
     }
 }
 ?>
