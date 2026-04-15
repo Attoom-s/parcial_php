@@ -1,17 +1,18 @@
 <?php
 require_once "Habilidad.php";
+require_once "Logger.php";
 
 class Personaje {
     public $nombre;
     public $vida;
-    public $vidaMax;       // Para saber porcentaje de vida
+    public $vidaMax;
     public $mana;
     public $habilidades = [];
-    public $items = [];     // Inventario de objetos (Item)
-    public $efectos = [];   // Efectos activos (Quemadura, etc.)
+    public $items = [];
+    public $efectos = [];
     public $nivel = 1;
     public $experiencia = 0;
-    public $danoExtra = 0;  // Bonificador temporal de daño (por usar arma)
+    public $danoExtra = 0;
 
     public function __construct($nombre, $vida, $mana) {
         $this->nombre = $nombre;
@@ -22,18 +23,17 @@ class Personaje {
 
     public function agregarHabilidad(Habilidad $h) {
         $this->habilidades[$h->nombre] = $h;
-        echo $this->nombre . " aprendió: " . $h->nombre . "<br>";
+        Logger::log($this->nombre . " aprendió: " . $h->nombre . "<br>");
     }
 
     public function agregarItem(Item $item) {
         $this->items[] = $item;
-        echo $this->nombre . " recibió: " . $item->nombre . " (peso {$item->peso})<br>";
+        Logger::log($this->nombre . " recibió: " . $item->nombre . " (peso {$item->peso})<br>");
     }
 
-    // Usar un objeto por su índice en el inventario
     public function usarItem($indice) {
         if (!isset($this->items[$indice])) {
-            echo "No tienes ese objeto.<br>";
+            Logger::log("No tienes ese objeto.<br>");
             return false;
         }
         $item = $this->items[$indice];
@@ -51,17 +51,15 @@ class Personaje {
                 $efecto = "aumenta el daño de su próximo ataque en {$item->peso} puntos";
                 break;
             default:
-                echo "Objeto no usable.<br>";
+                Logger::log("Objeto no usable.<br>");
                 return false;
         }
 
-        echo "$this->nombre usa {$item->nombre} → $efecto.<br>";
-        // Eliminar el objeto usado
+        Logger::log("$this->nombre usa {$item->nombre} → $efecto.<br>");
         array_splice($this->items, $indice, 1);
         return true;
     }
 
-    // Aplica todos los efectos activos (quemadura, etc.) al inicio del turno
     public function aplicarEfectos() {
         foreach ($this->efectos as $key => $efecto) {
             $efecto->aplicar($this);
@@ -69,7 +67,7 @@ class Personaje {
                 unset($this->efectos[$key]);
             }
         }
-        $this->efectos = array_values($this->efectos); // reindexar
+        $this->efectos = array_values($this->efectos);
     }
 
     public function usarHabilidad($nombre, Personaje $objetivo) {
@@ -88,28 +86,25 @@ class Personaje {
             }
 
             $this->mana -= $costoReal;
-            echo $this->nombre . " gasta $costoReal de mana (base: {$habilidad->costoBase}).<br>";
+            Logger::log($this->nombre . " gasta $costoReal de mana (base: {$habilidad->costoBase}).<br>");
 
-            // Aplicar daño extra si existe (por uso de arma)
             $danoExtraTemp = $this->danoExtra;
-            $this->danoExtra = 0; // se consume al atacar
+            $this->danoExtra = 0;
 
             $danio = $habilidad->usar($objetivo, $danoExtraTemp);
 
             if ($danio > 0) {
-                echo "<p class='danio'>$objetivo->nombre recibió $danio de daño. Vida restante: $objetivo->vida</p>";
+                Logger::log("<p class='danio'>$objetivo->nombre recibió $danio de daño. Vida restante: $objetivo->vida</p>");
             }
 
         } catch (Exception $e) {
-            echo "Error: " . $e->getMessage() . "<br>";
+            Logger::log("Error: " . $e->getMessage() . "<br>");
         }
     }
 
     public function recibirDanio($cantidad) {
         $this->vida -= $cantidad;
-        if ($this->vida < 0) {
-            $this->vida = 0;
-        }
+        if ($this->vida < 0) $this->vida = 0;
     }
 
     public function estaVivo() {
@@ -118,12 +113,12 @@ class Personaje {
 
     public function ganarExp($exp) {
         $this->experiencia += $exp;
-        echo $this->nombre . " ganó $exp de experiencia<br>";
+        Logger::log($this->nombre . " ganó $exp de experiencia<br>");
 
         while ($this->experiencia >= 50) {
             $this->nivel++;
             $this->experiencia -= 50;
-            echo $this->nombre . " subió a nivel " . $this->nivel . "<br>";
+            Logger::log($this->nombre . " subió a nivel " . $this->nivel . "<br>");
         }
     }
 }

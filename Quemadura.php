@@ -1,9 +1,10 @@
 <?php
 require_once "Personaje.php";
+require_once "Logger.php";
 
 class Quemadura {
     public $danioPorTurno;
-    public $duracion;  // turnos restantes
+    public $duracion;
 
     public function __construct($danio, $duracion = 3) {
         $this->danioPorTurno = $danio;
@@ -15,7 +16,7 @@ class Quemadura {
 
         $danioReal = $this->danioPorTurno + rand(-2, 2);
         if ($danioReal < 1) $danioReal = 1;
-        echo $p->nombre . " sufre quemadura (-$danioReal)<br>";
+        Logger::log($p->nombre . " sufre quemadura (-$danioReal)<br>");
         $p->recibirDanio($danioReal);
         $this->duracion--;
     }

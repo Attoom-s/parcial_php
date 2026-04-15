@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Batalla RPG</title>
+    <title>Batalla RPG - Chat de Combate</title>
     <style>
         body {
             background: linear-gradient(to bottom, #0f172a, #1e293b);
             color: white;
-            font-family: Arial;
+            font-family: 'Courier New', monospace;
             text-align: center;
+            padding: 20px;
         }
         .card {
             background: #1e293b;
@@ -16,172 +17,177 @@
             width: 300px;
             border-radius: 10px;
             box-shadow: 0 0 10px #000;
+            display: inline-block;
         }
         .contenedor {
             display: flex;
             justify-content: center;
             gap: 20px;
+            flex-wrap: wrap;
         }
         .vida { color: #22c55e; }
         .danio { color: #ef4444; }
         .critico { color: gold; font-weight: bold; }
+        .chat-container {
+            background: #0f172a;
+            border: 2px solid #facc15;
+            border-radius: 15px;
+            width: 80%;
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 15px;
+            text-align: left;
+            font-family: monospace;
+            font-size: 14px;
+            box-shadow: 0 0 15px rgba(250, 204, 21, 0.3);
+        }
+        .chat-log {
+            height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #020617;
+            border-radius: 10px;
+        }
+        .chat-log p {
+            margin: 5px 0;
+            border-left: 3px solid #facc15;
+            padding-left: 10px;
+        }
         .resultado {
             background: #020617;
             border: 2px solid gold;
             padding: 20px;
-            margin: 30px auto;
+            margin: 20px auto;
             width: 60%;
             border-radius: 15px;
-            box-shadow: 0 0 15px gold;
         }
         .ganador { color: #22c55e; font-size: 20px; font-weight: bold; }
         .perdedor { color: #ef4444; font-size: 20px; font-weight: bold; }
         .empate { color: #facc15; font-size: 20px; font-weight: bold; }
+        button {
+            background: #facc15;
+            color: #0f172a;
+            border: none;
+            padding: 8px 20px;
+            font-weight: bold;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #eab308;
+        }
+        h1, h2 {
+            text-shadow: 0 0 5px gold;
+        }
     </style>
 </head>
 <body>
 
-<h1>⚔️ Batalla RPG ⚔️</h1>
-<?php
-require_once "Personaje.php";
-require_once "Habilidad.php";
-require_once "Quemadura.php";
-require_once "Item.php";
+<h1>⚔️ BATALLA RPG - MODO CHAT ⚔️</h1>
 
-// Crear personajes
-$gandalf = new Personaje("Gandalf", 150, 200);
-$orco = new Personaje("Orco", 200, 150); 
+<div class="contenedor">
+    <div class="card">
+        <h2>🧙‍♂️ Gandalf</h2>
+        <p class="vida"><strong>Vida:</strong> <span id="gandalf-vida">150</span></p>
+        <p>Mana: <span id="gandalf-mana">200</span></p>
+    </div>
+    <div class="card">
+        <h2>👾 Orco</h2>
+        <p class="vida"><strong>Vida:</strong> <span id="orco-vida">200</span></p>
+        <p>Mana: <span id="orco-mana">150</span></p>
+    </div>
+</div>
 
-// Crear items
-$pocionG = new Item("pocion", "Poción de Vida", rand(1, 3));
-$espada = new Item("arma", "Espada", rand(4, 8));
-$pocionO = new Item("pocion", "Poción de Orco", rand(1, 3));
+<div class="chat-container">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3>📜 Registro del combate</h3>
+        <button id="reiniciarBtn">🔄 Reiniciar batalla</button>
+    </div>
+    <div id="chatLog" class="chat-log">
+        <p>✨ El combate comenzará en breve...</p>
+    </div>
+</div>
 
-$gandalf->agregarItem($pocionG);
-$gandalf->agregarItem($espada);
-$orco->agregarItem($pocionO);
+<div id="resultadoFinal" class="resultado" style="display: none;"></div>
 
-// Mostrar estado inicial
-echo "<div class='contenedor'>";
-echo "<div class='card'><h2>🧙‍♂️$gandalf->nombre</h2><p class='vida'><strong>Vida:</strong> $gandalf->vida</p><p>Mana: $gandalf->mana</p></div>";
-echo "<div class='card'><h2>👾$orco->nombre</h2><p class='vida'><strong>Vida:</strong> $orco->vida</p><p>Mana: $orco->mana</p></div>";
-echo "</div>";
+<script>
+// Almacenará los mensajes generados por PHP
+let mensajes = [];
+let indiceActual = 0;
+let intervalo = null;
+let combateActivo = true;
 
-// Habilidades: Bola de Fuego tiene 30% de quemadura (daño 10 por turno)
-$bolaFuego = new Habilidad("Bola de Fuego", 20, 40, 60, 30, 30, 10);
-$golpeFeroz = new Habilidad("Golpe Feroz", 15, 30, 50, 20);
-
-$gandalf->agregarHabilidad($bolaFuego);
-$orco->agregarHabilidad($golpeFeroz);
-
-$turno = 1;
-echo "<h2>¡Comienza el combate!</h2>";
-
-// Bucle principal
-while ($gandalf->estaVivo() && $orco->estaVivo()) {
-    echo "<br>Turno $turno<br>";
-
-    // ---------- APLICAR EFECTOS (quemadura) A AMBOS ----------
-    echo "<strong>⚡ Efectos de estado:</strong><br>";
-    $gandalf->aplicarEfectos();
-    $orco->aplicarEfectos();
-
-    // Si alguien muere por quemadura, salimos
-    if (!$gandalf->estaVivo() || !$orco->estaVivo()) break;
-
-    // ---------- TURNO DE GANDALF ----------
-    echo "<strong>Fase de Gandalf:</strong><br>";
-    $accionRealizada = false;
-
-    // Intenta usar una poción si vida < 40%
-    if ($gandalf->vida < $gandalf->vidaMax * 0.4) {
-        foreach ($gandalf->items as $i => $item) {
-            if ($item->tipo == 'pocion') {
-                $gandalf->usarItem($i);
-                $accionRealizada = true;
-                break;
-            }
-        }
+// Función para mostrar un nuevo mensaje en el chat
+function mostrarSiguienteMensaje() {
+    if (indiceActual < mensajes.length) {
+        const chatDiv = document.getElementById('chatLog');
+        const nuevoMensaje = document.createElement('p');
+        nuevoMensaje.innerHTML = mensajes[indiceActual];
+        chatDiv.appendChild(nuevoMensaje);
+        chatDiv.scrollTop = chatDiv.scrollHeight;
+        indiceActual++;
+    } else {
+        // Fin de los mensajes, detener intervalo
+        if (intervalo) clearInterval(intervalo);
+        intervalo = null;
+        combateActivo = false;
     }
+}
 
-    // Si no usó poción y tiene un arma, puede usarla para potenciar el próximo ataque
-    if (!$accionRealizada && $gandalf->danoExtra == 0) {
-        foreach ($gandalf->items as $i => $item) {
-            if ($item->tipo == 'arma') {
-                $gandalf->usarItem($i);
-                $accionRealizada = true;
-                break;
-            }
-        }
-    }
-
-    // Si no usó ningún item, ataca con habilidad
-    if (!$accionRealizada) {
-        if ($gandalf->mana >= $bolaFuego->costoBase) {
-            $gandalf->usarHabilidad("Bola de Fuego", $orco);
-        } else {
-            echo "Gandalf no tiene suficiente mana para atacar.<br>";
-        }
-    }
-
-    if (!$orco->estaVivo()) {
-        echo "<br>¡Gandalf ha derrotado al Orco!<br>";
-        break;
-    }
-
-    // ---------- TURNO DEL ORCO ----------
-    echo "<strong>Fase del Orco:</strong><br>";
-    $accionRealizada = false;
-
-    // Orco usa poción si vida baja
-    if ($orco->vida < $orco->vidaMax * 0.4) {
-        foreach ($orco->items as $i => $item) {
-            if ($item->tipo == 'pocion') {
-                $orco->usarItem($i);
-                $accionRealizada = true;
-                break;
-            }
-        }
-    }
-
-    if (!$accionRealizada && $orco->mana >= $golpeFeroz->costoBase) {
-        $orco->usarHabilidad("Golpe Feroz", $gandalf);
-    } elseif (!$accionRealizada) {
-        echo "El Orco no tiene suficiente mana para atacar.<br>";
-    }
-
-    // Mostrar estado después del turno
-    echo "<br><strong>Estado del combate:</strong><br>";
-    echo "{$gandalf->nombre} Vida: {$gandalf->vida} | Mana: {$gandalf->mana}<br>";
-    echo "{$orco->nombre} Vida: {$orco->vida} | Mana: {$orco->mana}<br>";
+// Función para cargar los datos de la batalla vía AJAX (sin recargar la página)
+function iniciarBatalla() {
+    // Limpiar chat y resultado
+    const chatDiv = document.getElementById('chatLog');
+    chatDiv.innerHTML = '<p>⚔️ Iniciando nueva batalla...</p>';
+    document.getElementById('resultadoFinal').style.display = 'none';
+    document.getElementById('resultadoFinal').innerHTML = '';
     
-    $turno++;
-    if ($turno >= 10) {
-        echo "<br>¡Límite de turnos alcanzado! Combate empatado.<br>";
-        break;
-    }
+    // Resetear índices
+    indiceActual = 0;
+    if (intervalo) clearInterval(intervalo);
+    
+    // Petición fetch para obtener los mensajes y el resultado
+    fetch('batalla_api.php')
+        .then(response => response.json())
+        .then(data => {
+            mensajes = data.mensajes;
+            indiceActual = 0;
+            // Mostrar mensajes cada 0.8 segundos
+            intervalo = setInterval(mostrarSiguienteMensaje, 2000);
+            
+            // Actualizar las barras de vida/mana según el estado final (opcional)
+            if (data.estadoFinal) {
+                document.getElementById('gandalf-vida').innerText = data.estadoFinal.gandalf.vida;
+                document.getElementById('gandalf-mana').innerText = data.estadoFinal.gandalf.mana;
+                document.getElementById('orco-vida').innerText = data.estadoFinal.orco.vida;
+                document.getElementById('orco-mana').innerText = data.estadoFinal.orco.mana;
+            }
+            
+            // Mostrar resultado final cuando terminen los mensajes
+            const checkResultado = setInterval(() => {
+                if (!intervalo && indiceActual >= mensajes.length) {
+                    clearInterval(checkResultado);
+                    const resultadoDiv = document.getElementById('resultadoFinal');
+                    resultadoDiv.style.display = 'block';
+                    resultadoDiv.innerHTML = data.resultadoHTML;
+                }
+            }, 100);
+        })
+        .catch(error => {
+            console.error('Error al cargar la batalla:', error);
+            chatDiv.innerHTML += '<p style="color:red">❌ Error al cargar el combate. Recarga la página.</p>';
+        });
 }
 
-// Resultado final
-echo "<div class='resultado'>";
-echo "<h3>🏆 Resultado del combate</h3>";
-if (!$orco->estaVivo()) {
-    echo "<p class='ganador'>¡Gandalf gana el combate en $turno turnos! 🎉</p>";
-    $expGanada = rand(20, 30);
-    $gandalf->ganarExp($expGanada);
-} elseif (!$gandalf->estaVivo()) {
-    echo "<p class='perdedor'>💀 El Orco ha derrotado a Gandalf.</p>";
-} else {
-    echo "<p class='empate'>⚖️ El combate terminó sin un ganador claro.</p>";
-}
-echo "</div>";
+// Al cargar la página, iniciar automáticamente
+window.onload = () => {
+    iniciarBatalla();
+    document.getElementById('reiniciarBtn').addEventListener('click', () => {
+        iniciarBatalla();
+    });
+};
+</script>
 
-// Mostrar items restantes para depuración
-echo "<br>📦 Inventario final de Gandalf: ";
-foreach ($gandalf->items as $item) echo $item->nombre . " (peso {$item->peso}) ";
-echo "<br>📦 Inventario final del Orco: ";
-foreach ($orco->items as $item) echo $item->nombre . " (peso {$item->peso}) ";
-
-?> 
 </body>
 </html>
