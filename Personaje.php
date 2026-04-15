@@ -28,9 +28,8 @@ class Personaje {
 
             $habilidad = $this->habilidades[$nombre];
             
-            // Costo real con variación aleatoria (+/- 5)
             $costoReal = $habilidad->costoBase + rand(-5, 5);
-            if ($costoReal < 5) $costoReal = 5; // mínimo 5 de mana
+            if ($costoReal < 5) $costoReal = 5; 
 
             if ($this->mana < $costoReal) {
                 throw new Exception("No tiene suficiente mana (necesita $costoReal)");
@@ -42,7 +41,7 @@ class Personaje {
             $danio = $habilidad->usar($objetivo);
 
             if ($danio > 0) {
-                echo $objetivo->nombre . " recibió $danio de daño. Vida restante: " . $objetivo->vida . "<br>";
+            echo "<p class='danio'>$objetivo->nombre recibió $danio de daño. Vida restante: $objetivo->vida</p>";
             }
 
         } catch (Exception $e) {
@@ -62,7 +61,6 @@ class Personaje {
     }
 
     public function ganarExp($exp) {
-        // También se podría aleatorizar la experiencia recibida fuera
         $this->experiencia += $exp;
         echo $this->nombre . " ganó $exp de experiencia<br>";
 

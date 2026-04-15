@@ -18,19 +18,16 @@ class Habilidad implements IHabilidad {
     }
 
     public function usar(Personaje $objetivo) {
-        // 1. Daño aleatorio dentro del rango
         $danio = rand($this->danioMin, $this->danioMax);
 
-        // 2. Crítico aleatorio según probabilidad
         if (rand(1, 100) <= $this->probCritico) {
             $danio *= 2;
-            echo "¡Golpe crítico!\n",'<br>';
+        echo "<p class='critico'>¡Golpe crítico!</p>";
         }
 
-        // 3. Pequeña probabilidad de fallo (10%)
         if (rand(1, 100) <= 10) {
             echo $this->nombre . " ha fallado.\n",'<br>';
-            return 0; // no causa daño
+            return 0;
         }
 
         $objetivo->recibirDanio($danio);

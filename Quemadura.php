@@ -7,9 +7,9 @@ class Quemadura {
     public function __construct($danio) {
         $this->danioPorTurno = $danio;
     }
-
+    
+    //Danio por turno
     public function aplicar(Personaje $p) {
-        // Podría tener una pequeña variación cada vez que se aplica
         $danioReal = $this->danioPorTurno + rand(-2, 2);
         if ($danioReal < 1) $danioReal = 1;
         echo $p->nombre . " sufre quemadura (-$danioReal)\n";
