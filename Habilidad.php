@@ -29,6 +29,7 @@ class Habilidad implements IHabilidad {
             return 0;
         }
 
+        //Calcular daño critico
         $danio = rand($this->danioMin, $this->danioMax) + $danoExtra;
 
         if (rand(1, 100) <= $this->probCritico) {
@@ -36,8 +37,10 @@ class Habilidad implements IHabilidad {
             Logger::log("<p class='critico'>¡Golpe crítico!</p>");
         }
 
+        //Aplicar daño
         $objetivo->recibirDanio($danio);
-
+        
+        //Probabilidad de que efecto quemadura 
         if ($this->probQuemadura > 0 && rand(1, 100) <= $this->probQuemadura) {
             $quemadura = new Quemadura($this->danioQuemadura);
             $objetivo->efectos[] = $quemadura;

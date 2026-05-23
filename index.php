@@ -84,7 +84,7 @@
 </head>
 <body>
 
-<h1>⚔️ BATALLA RPG - MODO CHAT ⚔️</h1>
+<h1>⚔️ BATALLA RPG ⚔️</h1>
 
 <div class="contenedor">
     <div class="card">
@@ -154,7 +154,7 @@ function iniciarBatalla() {
             mensajes = data.mensajes;
             indiceActual = 0;
             // Mostrar mensajes cada 0.8 segundos
-            intervalo = setInterval(mostrarSiguienteMensaje, 2000);
+            intervalo = setInterval(mostrarSiguienteMensaje, 1000);
             
             // Actualizar las barras de vida/mana según el estado final (opcional)
             if (data.estadoFinal) {
